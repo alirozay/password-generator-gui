@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import random
 
 LIGHT_BLUE = "#E8F9FD"
@@ -27,19 +28,34 @@ def password_generator() -> None:
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_password() -> None:
-    if website_entry.get() != "" and email_entry.get() != "" and \
-            password_entry.get() != 0:
-        result = f"{website_entry.get()} | {email_entry.get()} | {password_entry.get()}"
+    website = website_entry.get()
+    email = email_entry.get()
+    password = password_entry.get()
+    if website != "" and email != "" and \
+            password != 0:
+        result = f"{website} | {email} | {password}"
         with open("password.txt", mode='a+') as f:
             f.seek(0)
             passwords = f.readlines()
             for i in range(len(passwords)):
                 passwords[i] = passwords[i].strip()
-            print(passwords)
             if result not in passwords:
-                f.seek(0, 2)
-                f.write(f"{result}\n")
-
+                is_ok = messagebox.askokcancel(title="Save password?",
+                                               message=f"These are the details:\n"
+                                                       f"Website: {website}\n"
+                                                       f"Email: {email}\n"
+                                                       f"Password: {password}")
+                if is_ok:
+                    f.seek(0, 2)
+                    f.write(f"{result}\n")
+                    website_entry.delete(0, END)
+                    password_entry.delete(0, END)
+            else:
+                messagebox.showerror(title="Oops", message="Password already "
+                                                           "exists")
+    else:
+        messagebox.showerror(title="Oops", message="Please don't leave any "
+                                                   "fields empty")
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -63,6 +79,7 @@ password_label.grid(row=3, column=0)
 website_entry = Entry(width=35)
 email_entry = Entry(width=35)
 password_entry = Entry(width=21)
+email_entry.insert(END, string="alirozay@protonmail.com")
 website_entry.grid(row=1, column=1, columnspan=2)
 email_entry.grid(row=2, column=1, columnspan=2)
 password_entry.grid(row=3, column=1)
