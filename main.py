@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import random
+import json
 
 LIGHT_BLUE = "#E8F9FD"
 FONT = ('Cambria', 12, 'bold')
@@ -26,36 +27,58 @@ def password_generator() -> None:
         password_entry.insert(END, string=result)
 
 
+# ----------------------------- SEARCH PASSWOD -------------------------------#
+def search_password() -> None:
+    website = website_entry.get()
+    try:
+        with open(file="password.json", mode="r") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        messagebox.showerror(title="Ops",
+                             message="Password manager not initialized."
+                                     "\nAdd a password to get started")
+    else:
+        try:
+            data = data[website]
+        except KeyError:
+            messagebox.showerror(title="Ops", message="Password for "
+                                                      "website not found")
+        else:
+            email = data["Email"]
+            password = data["Password"]
+            message = f"Email: {email}\nPassword: {password}"
+            messagebox.showinfo(title="Details", message=message)
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_password() -> None:
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    new_data = {
+        website: {
+            "Email": email,
+            "Password": password
+        }
+    }
     if website != "" and email != "" and \
             password != 0:
-        result = f"{website} | {email} | {password}"
-        with open("password.txt", mode='a+') as f:
-            f.seek(0)
-            passwords = f.readlines()
-            for i in range(len(passwords)):
-                passwords[i] = passwords[i].strip()
-            if result not in passwords:
-                is_ok = messagebox.askokcancel(title="Save password?",
-                                               message=f"These are the details:\n"
-                                                       f"Website: {website}\n"
-                                                       f"Email: {email}\n"
-                                                       f"Password: {password}")
-                if is_ok:
-                    f.seek(0, 2)
-                    f.write(f"{result}\n")
-                    website_entry.delete(0, END)
-                    password_entry.delete(0, END)
-            else:
-                messagebox.showerror(title="Oops", message="Password already "
-                                                           "exists")
+        try:
+            with open("password.json", mode='r') as f:
+                data = json.load(f)
+                data.update(new_data)
+
+        except FileNotFoundError:
+            with open("password.json", mode='w') as f:
+                json.dump(new_data, f, indent=4)
+        else:
+            with open("password.json", mode='w') as f:
+                json.dump(data, f, indent=4)
+        finally:
+            website_entry.delete(0, END)
+            password_entry.delete(0, END)
     else:
         messagebox.showerror(title="Oops", message="Please don't leave any "
                                                    "fields empty")
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -86,6 +109,8 @@ password_entry.grid(row=3, column=1)
 
 add_button = Button(text="Add", width=36, command=save_password)
 generate_button = Button(text="Generate", width=10, command=password_generator)
+search_button = Button(text="Search", command=search_password)
+search_button.grid(row=1, column=2)
 generate_button.grid(row=3, column=2)
 add_button.grid(row=4, column=1)
 
