@@ -23,7 +23,7 @@ def password_generator() -> None:
     password_entry.delete(0, END)
     for i in range(15):
         list_choice = random.choice(LISTS)
-        result += random.choice(list_choice)
+        result += random.choice(list_choice)   #Check to see if previous symbol state matches the current symbol state
         password_entry.insert(END, string=result)
 
 
