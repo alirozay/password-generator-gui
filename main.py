@@ -20,10 +20,17 @@ LISTS = [SYMBOLS, NUMBERS, LOWER_CASE, UPPER_CASE]
 # ------------------------------- #
 def password_generator() -> None:
     result = ""
-    password_entry.delete(0, END)
     for i in range(15):
+        password_entry.delete(0, END)
         list_choice = random.choice(LISTS)
-        result += random.choice(list_choice)   #Check to see if previous symbol state matches the current symbol state
+        word = random.choice(list_choice)
+        while True and i > 0:
+            if result[i-1] in list_choice:
+                list_choice = random.choice(LISTS)
+                word = random.choice(list_choice)
+            else:
+                break
+        result += word   #Check to see if previous symbol state matches the current symbol state
         password_entry.insert(END, string=result)
 
 
